@@ -1,21 +1,16 @@
-from __future__ import print_function
-
 import base64
-
 import six
 
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from database_files import utils
-from database_files.utils import write_file, is_fresh
-from database_files.manager import FileManager
+from . import utils
+from .utils import write_file, is_fresh
+from .manager import FileManager
 
-from . import settings as _settings
 
 class File(models.Model):
-    
     objects = FileManager()
     
     name = models.CharField(
@@ -47,7 +42,6 @@ class File(models.Model):
         db_table = 'database_files_file'
     
     def save(self, *args, **kwargs):
-        
         # Check for and clear old content hash.
         if self.id:
             old = File.objects.get(id=self.id)
@@ -117,8 +111,7 @@ class File(models.Model):
                     print('%i of %i' % (i, total))
                 if not is_fresh(name=name, content_hash=content_hash):
                     if verbose:
-                        print(('File %i-%s is stale. Writing to local file '
-                            'system...') % (file_id, name))
+                        print('File %i-%s is stale. Writing to local file system...' % (file_id, name))
                     f = File.objects.get(id=file_id)
                     write_file(
                         f.name,

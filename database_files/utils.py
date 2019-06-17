@@ -1,4 +1,3 @@
-
 import os
 import hashlib
 
@@ -6,6 +5,7 @@ import six
 
 from django.conf import settings
 from database_files import settings as _settings
+
 
 def is_fresh(name, content_hash):
     """
@@ -34,6 +34,7 @@ def is_fresh(name, content_hash):
     local_content_hash = get_file_hash(fqfn)
     return local_content_hash == content_hash
 
+
 def get_hash_fn(name):
     """
     Returns the filename for the hash file.
@@ -46,6 +47,7 @@ def get_hash_fn(name):
     fqfn_parts = os.path.split(fqfn)
     hash_fn = os.path.join(fqfn_parts[0], _settings.DB_FILES_DEFAULT_HASH_FN_TEMPLATE % fqfn_parts[1])
     return hash_fn
+
 
 def write_file(name, content, overwrite=False):
     """
@@ -83,11 +85,11 @@ def write_file(name, content, overwrite=False):
     if perms:
         os.system('chmod -R %s "%s"' % (perms, dirs))
 
+
 def get_file_hash(fin, force_encoding=None, encoding=None, errors=None, chunk_size=128):
     """
     Iteratively builds a file hash without loading the entire file into memory.
     """
-    
     force_encoding = force_encoding or _settings.DB_FILES_DEFAULT_ENFORCE_ENCODING
     
     encoding = encoding or _settings.DB_FILES_DEFAULT_ENCODING
@@ -109,6 +111,7 @@ def get_file_hash(fin, force_encoding=None, encoding=None, errors=None, chunk_si
             h.update(text)
     return h.hexdigest()
 
+
 def get_text_hash_0004(text):
     """
     Returns the hash of the given text.
@@ -119,11 +122,11 @@ def get_text_hash_0004(text):
     h.update(text.encode('utf-8', 'replace'))
     return h.hexdigest()
 
+
 def get_text_hash(text, force_encoding=None, encoding=None, errors=None):
     """
     Returns the hash of the given text.
     """
-    
     force_encoding = force_encoding or _settings.DB_FILES_DEFAULT_ENFORCE_ENCODING
     
     encoding = encoding or _settings.DB_FILES_DEFAULT_ENCODING

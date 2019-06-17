@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
 
 import database_files
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+
 
 def get_reqs(*fns):
     lst = []
@@ -17,10 +18,12 @@ def get_reqs(*fns):
             lst.append(package.strip())
     return lst
 
+
 try:
     long_description = read_md('README.md')
-except:
+except Exception:
     long_description = ''
+
 
 setup(
     name='django-database-files-3000',
@@ -31,7 +34,6 @@ setup(
     author_email='chrisspen@gmail.com',
     url='http://github.com/chrisspen/django-database-files-3000',
     packages=find_packages(),
-    #https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 6 - Mature',
         'Framework :: Django',

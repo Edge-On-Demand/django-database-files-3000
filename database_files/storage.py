@@ -1,30 +1,20 @@
-from __future__ import print_function
 import os
 
 import six
-from six import StringIO
 
-from django.conf import settings
 from django.core import files
 from django.core.files.storage import FileSystemStorage
-try:
-    from django.core.urlresolvers import reverse
-except ImportError:
-    from django.urls import reverse
 
-from database_files import models
-from database_files import utils
-from database_files import settings as _settings
+from . import models
+from . import utils
+from . import settings as _settings
+
 
 class DatabaseStorage(FileSystemStorage):
-    
     def _generate_name(self, name, pk):
         """
         Replaces the filename with the specified pk and removes any dir
         """
-        #dir_name, file_name = os.path.split(name)
-        #file_root, file_ext = os.path.splitext(file_name)
-        #return '%s%s' % (pk, file_name)
         return name
     
     def _open(self, name, mode='rb'):
@@ -49,7 +39,6 @@ class DatabaseStorage(FileSystemStorage):
             # and load it into the database if present.
             fqfn = self.path(name)
             if os.path.isfile(fqfn):
-                #print('Loading file into database.')
                 self._save(name, open(fqfn, mode))
                 fh = super(DatabaseStorage, self)._open(name, mode)
                 content = fh.read()
@@ -58,7 +47,6 @@ class DatabaseStorage(FileSystemStorage):
                 # Otherwise we don't know where the file is.
                 return None
         # Normalize the content to a new file object.
-        #fh = StringIO(content)
         fh = six.BytesIO(content)
         fh.name = name
         fh.mode = mode
