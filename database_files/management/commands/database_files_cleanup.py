@@ -1,12 +1,10 @@
-from __future__ import print_function
-
-import os
 from optparse import make_option
 
+from django.apps import apps
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.core.management.base import BaseCommand, CommandError
-from django.db.models import FileField, ImageField, get_models
+from django.core.management.base import BaseCommand
+from django.db.models import FileField, ImageField
 
 from database_files.models import File
 
@@ -16,15 +14,11 @@ class Command(BaseCommand):
     help = 'Deletes all files in the database that are not referenced by ' + \
         'any model fields.'
     option_list = BaseCommand.option_list + (
-        make_option('--dryrun',
-            action='store_true',
-            dest='dryrun',
-            default=False,
-            help='If given, only displays the names of orphaned files ' + \
-                'and does not delete them.'),
-        make_option('--filenames',
-            default='',
-            help='If given, only files with these names will be checked'),
+        make_option(
+            '--dryrun', action='store_true', dest='dryrun', default=False,
+            help='If given, only displays the names of orphaned files and does not delete them.'),
+        make_option(
+            '--filenames', default='', help='If given, only files with these names will be checked')
         )
 
     def handle(self, *args, **options):
@@ -34,7 +28,7 @@ class Command(BaseCommand):
         dryrun = options['dryrun']
         filenames = set(_.strip() for _ in options['filenames'].split(',') if _.strip())
         try:
-            for model in get_models():
+            for model in apps.get_models():
                 print('Checking model %s...' % (model,))
                 for field in model._meta.fields:
                     if not isinstance(field, (FileField, ImageField)):

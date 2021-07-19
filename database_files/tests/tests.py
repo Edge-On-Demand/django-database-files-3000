@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 import os
 import shutil
 
 import six
-from six import StringIO
 
 from django.core import files
 from django.test import TestCase
@@ -15,11 +13,11 @@ from database_files.models import File
 from database_files.tests.models import Thing
 from database_files import utils
 
+
 DIR = os.path.abspath(os.path.split(__file__)[0])
 
 
 class DatabaseFilesTestCase(TestCase):
-
     def setUp(self):
         self.media_dir = os.path.join(DIR, 'media/i/special')
         if os.path.isdir(self.media_dir):
@@ -27,7 +25,6 @@ class DatabaseFilesTestCase(TestCase):
         os.makedirs(self.media_dir)
 
     def test_adding_file(self):
-
         # Create default thing storing reference to file
         # in the local media directory.
         test_fqfn = os.path.join(self.media_dir, 'test.txt')
@@ -63,8 +60,6 @@ class DatabaseFilesTestCase(TestCase):
         # Load a dynamically created file outside /media.
         test_file = files.temp.NamedTemporaryFile(
             suffix='.txt',
-            # Django>=1.10 no longer allows accessing files outside of MEDIA_ROOT...
-            #dir=files.temp.gettempdir()
             dir=os.path.join(settings.PROJECT_DIR, 'media'),
         )
         data0 = b'1234567890'
@@ -97,33 +92,31 @@ class DatabaseFilesTestCase(TestCase):
         self.assertEqual(os.path.isfile(test_fqfn), False)
 
     def test_hash(self):
-        verbose = 1
-
         # Create test file.
         image_content = open(os.path.join(DIR, 'fixtures/test_image.png'), 'rb').read()
         fqfn = os.path.join(self.media_dir, 'image.png')
         open(fqfn, 'wb').write(image_content)
 
         # Calculate hash from various sources and confirm they all match.
-        expected_hash = '35830221efe45ab0dc3d91ca23c29d2d3c20d00c9afeaa096ab256ec322a7a0b3293f07a01377e31060e65b4e5f6f8fdb4c0e56bc586bba5a7ab3e6d6d97a192' # pylint: disable=C0301
+        expected_hash = '35830221efe45ab0dc3d91ca23c29d2d3c20d00c9afeaa096ab256ec' \
+                        '322a7a0b3293f07a01377e31060e65b4e5f6f8fdb4c0e56bc586bba5a7ab3e6d6d97a192'
         h = utils.get_text_hash(image_content)
         self.assertEqual(h, expected_hash)
         h = utils.get_file_hash(fqfn)
         self.assertEqual(h, expected_hash)
         h = utils.get_text_hash(open(fqfn, 'rb').read())
         self.assertEqual(h, expected_hash)
-        #        h = utils.get_text_hash(open(fqfn, 'r').read())#not supported in py3
-        #        self.assertEqual(h, expected_hash)
 
         # Create test file.
         if six.PY3:
-            image_content = six.text_type('aあä') #, encoding='utf-8')
+            image_content = six.text_type('aあä')
         else:
             image_content = six.text_type('aあä', encoding='utf-8')
         fqfn = os.path.join(self.media_dir, 'test.txt')
         open(fqfn, 'wb').write(image_content.encode('utf-8'))
 
-        expected_hash = '1f40fc92da241694750979ee6cf582f2d5d7d28e18335de05abc54d0560e0f5302860c652bf08d560252aa5e74210546f369fbbbce8c12cfc7957b2652fe9a75' # pylint: disable=C0301
+        expected_hash = '1f40fc92da241694750979ee6cf582f2d5d7d28e18335de05abc54d0560e' \
+                        '0f5302860c652bf08d560252aa5e74210546f369fbbbce8c12cfc7957b2652fe9a75'
         h = utils.get_text_hash(image_content)
         self.assertEqual(h, expected_hash)
         h = utils.get_file_hash(fqfn)

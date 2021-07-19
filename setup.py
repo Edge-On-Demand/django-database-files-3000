@@ -1,11 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
 
-import database_files
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+VERSION = '1.0.6'
+
 
 try:
     with open(os.path.join(CURRENT_DIR, 'README.md'), encoding='utf-8') as f:
@@ -28,7 +27,7 @@ def get_reqs(*fns):
 
 setup(
     name='django-database-files-3000',
-    version=database_files.__version__,
+    version=VERSION,
     description='A storage system for Django that stores uploaded files in both the database and file system.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -36,7 +35,6 @@ setup(
     author_email='chrisspen@gmail.com',
     url='http://github.com/chrisspen/django-database-files-3000',
     packages=find_packages(),
-    #https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 6 - Mature',
         'Framework :: Django',
@@ -44,12 +42,9 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
-    install_requires=get_reqs('pip-requirements-min-django.txt', 'pip-requirements.txt'),
+    install_requires=get_reqs('pip-requirements.txt'),
     tests_require=get_reqs('pip-requirements-test.txt'),
 )

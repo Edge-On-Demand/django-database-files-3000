@@ -1,6 +1,4 @@
-import base64
 import mimetypes
-import os
 
 from django.conf import settings
 from django.http import Http404, HttpResponse

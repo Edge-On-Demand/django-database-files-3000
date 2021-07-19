@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import base64
 
 import six
@@ -10,15 +8,14 @@ from django.utils import timezone
 
 from database_files import utils
 from database_files.utils import write_file, is_fresh
-from database_files.manager import FileManager
 
-from . import settings as _settings
+
+class FileManager(models.Manager):
+    def get_from_name(self, name):
+        return self.get(name=name)
 
 
 class File(models.Model):
-
-    objects = FileManager()
-
     name = models.CharField(max_length=255, unique=True, blank=False, null=False, db_index=True)
 
     size = models.PositiveIntegerField(db_index=True, blank=False, null=False)
@@ -29,11 +26,12 @@ class File(models.Model):
 
     _content_hash = models.CharField(db_column='content_hash', db_index=True, max_length=128, blank=True, null=True)
 
+    objects = FileManager()
+
     class Meta:
         db_table = 'database_files_file'
 
     def save(self, *args, **kwargs):
-
         # Check for and clear old content hash.
         if self.id:
             old = File.objects.get(id=self.id)
@@ -99,7 +97,7 @@ class File(models.Model):
                     print('%i of %i' % (i, total))
                 if not is_fresh(name=name, content_hash=content_hash):
                     if verbose:
-                        print(('File %i-%s is stale. Writing to local file ' 'system...') % (file_id, name))
+                        print('File %i-%s is stale. Writing to local file ' 'system...' % (file_id, name))
                     f = File.objects.get(id=file_id)
                     write_file(f.name, f.content, overwrite=True)
                     f._content_hash = None

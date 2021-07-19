@@ -1,17 +1,17 @@
-from __future__ import print_function
-
 import os
 from optparse import make_option
 
+from django.apps import apps
 from django.conf import settings
-from django.core.files.storage import default_storage
-from django.core.management.base import BaseCommand, CommandError
-from django.db.models import FileField, ImageField, get_models
+from django.core.management.base import BaseCommand
+from django.db.models import FileField, ImageField
 
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('-m', '--models', dest='models', default='', help='A list of models to search for file fields. Default is all.'),
+        make_option(
+            '-m', '--models', dest='models', default='',
+            help='A list of models to search for file fields. Default is all.'),
     )
     help = 'Loads all files on the filesystem referenced by FileFields ' + \
         'or ImageFields into the database. This should only need to be ' + \
@@ -23,8 +23,8 @@ class Command(BaseCommand):
         tmp_debug = settings.DEBUG
         settings.DEBUG = False
         try:
-            broken = 0 # Number of db records referencing missing files.
-            for model in get_models():
+            broken = 0  # Number of db records referencing missing files.
+            for model in apps. get_models():
                 key = "%s.%s" % (model._meta.app_label, model._meta.module_name)
                 key = key.lower()
                 if all_models and key not in all_models:

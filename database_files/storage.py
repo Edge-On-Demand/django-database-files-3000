@@ -1,40 +1,23 @@
-from __future__ import print_function
 import os
 
 import six
-from six import StringIO
 
-from django.conf import settings
 from django.core import files
 from django.core.files.storage import FileSystemStorage
-try:
-    from django.core.urlresolvers import reverse
-except ImportError:
-    from django.urls import reverse
 
-from database_files import models
+from .models import File
 from database_files import utils
 from database_files import settings as _settings
 
 
 class DatabaseStorage(FileSystemStorage):
-
-    def _generate_name(self, name, pk):
-        """
-        Replaces the filename with the specified pk and removes any dir
-        """
-        #dir_name, file_name = os.path.split(name)
-        #file_root, file_ext = os.path.splitext(file_name)
-        #return '%s%s' % (pk, file_name)
-        return name
-
     def _open(self, name, mode='rb'):
         """
         Open file with filename `name` from the database.
         """
         try:
             # Load file from database.
-            f = models.File.objects.get_from_name(name)
+            f = File.objects.get_from_name(name)
             content = f.content
             size = f.size
             if _settings.DB_FILES_AUTO_EXPORT_DB_TO_FS and not utils.is_fresh(f.name, f.content_hash):
@@ -45,12 +28,11 @@ class DatabaseStorage(FileSystemStorage):
                 # One user might upload a file from one web server, and then
                 # another might access if from another server.
                 utils.write_file(f.name, f.content)
-        except models.File.DoesNotExist:
+        except File.DoesNotExist:
             # If not yet in the database, check the local file system
             # and load it into the database if present.
             fqfn = self.path(name)
             if os.path.isfile(fqfn):
-                #print('Loading file into database.')
                 self._save(name, open(fqfn, mode))
                 fh = super(DatabaseStorage, self)._open(name, mode)
                 content = fh.read()
@@ -59,7 +41,6 @@ class DatabaseStorage(FileSystemStorage):
                 # Otherwise we don't know where the file is.
                 return None
         # Normalize the content to a new file object.
-        #fh = StringIO(content)
         fh = six.BytesIO(content)
         fh.name = name
         fh.mode = mode
@@ -78,23 +59,18 @@ class DatabaseStorage(FileSystemStorage):
             size = os.path.getsize(full_path)
         content.seek(0)
         content = content.read()
-        f = models.File.objects.create(
-            content=content,
-            size=size,
-            name=name,
-        )
+        File.objects.create(content=content, size=size, name=name)
         # Automatically write the change to the local file system.
         if _settings.DB_FILES_AUTO_EXPORT_DB_TO_FS:
             utils.write_file(name, content, overwrite=True)
-        #TODO:add callback to handle custom save behavior?
-        return self._generate_name(name, f.pk)
+        return name
 
     def exists(self, name):
         """
         Returns true if a file with the given filename exists in the database.
         Returns false otherwise.
         """
-        if models.File.objects.filter(name=name).exists():
+        if File.objects.filter(name=name).exists():
             return True
         return super(DatabaseStorage, self).exists(name)
 
@@ -103,11 +79,11 @@ class DatabaseStorage(FileSystemStorage):
         Deletes the file with filename `name` from the database and filesystem.
         """
         try:
-            models.File.objects.get_from_name(name).delete()
+            File.objects.get_from_name(name).delete()
             hash_fn = utils.get_hash_fn(name)
             if os.path.isfile(hash_fn):
                 os.remove(hash_fn)
-        except models.File.DoesNotExist:
+        except File.DoesNotExist:
             pass
         return super(DatabaseStorage, self).delete(name)
 
@@ -121,8 +97,7 @@ class DatabaseStorage(FileSystemStorage):
         """
         Returns the size of the file with filename `name` in bytes.
         """
-        full_path = self.path(name)
         try:
-            return models.File.objects.get_from_name(name).size
-        except models.File.DoesNotExist:
+            return File.objects.get_from_name(name).size
+        except File.DoesNotExist:
             return super(DatabaseStorage, self).size(name)
