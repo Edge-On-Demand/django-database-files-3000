@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import re_path
 
 from .views import serve_mixed
 
 
 urlpatterns = [
-    url(r'^files/(?P<name>.+)$', serve_mixed, name='database_file')
+    re_path(r'^files/(?P<name>.+)$', serve_mixed, name='database_file')
 ]
